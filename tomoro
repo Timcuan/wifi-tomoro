@@ -111,8 +111,10 @@ tomoro_doctor() {
 
     if command -v ingfo >/dev/null 2>&1; then
         tomoro_doctor_report "Shortcut ingfo" ok "$(command -v ingfo)"
+    elif [[ -x "${TOMORO_REPO_DIR}/ingfo" ]]; then
+        tomoro_doctor_report "Shortcut ingfo" warn "Pakai ./ingfo atau install.sh untuk global"
     else
-        tomoro_doctor_report "Shortcut ingfo" warn "Jalankan: curl install.sh | bash"
+        tomoro_doctor_report "Shortcut ingfo" err "install: curl install.sh | bash"
         ok=0
     fi
 

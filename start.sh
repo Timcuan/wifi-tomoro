@@ -114,7 +114,7 @@ if [ ! -f "$SPOOF_BIN" ]; then
     # Detect macOS architecture
     ARCH=$(uname -m)
     case "$ARCH" in
-        x86_64)  SPOOF_ARCH="amd64" ;;
+        x86_64)  SPOOF_ARCH="x86_64" ;;
         arm64)   SPOOF_ARCH="arm64" ;;
         *)
             echo -e "${RED}❌ Unsupported architecture: ${ARCH}${NC}"
@@ -125,7 +125,14 @@ if [ ! -f "$SPOOF_BIN" ]; then
     echo -e "  OS   : macOS (Darwin)"
     echo -e "  Arch : ${BOLD}${ARCH}${NC} (${SPOOF_ARCH})"
     
-    DOWNLOAD_URL="https://github.com/xvzc/SpoofDPI/releases/latest/download/spoofdpi-darwin-${SPOOF_ARCH}.tar.gz"
+    # Fetch latest release tag and version
+    LATEST_TAG=$(curl -s https://api.github.com/repos/xvzc/spoofdpi/releases/latest | grep tag_name | cut -d '"' -f 4)
+    if [ -z "$LATEST_TAG" ]; then
+        LATEST_TAG="v1.5.3"
+    fi
+    VERSION=${LATEST_TAG#v}
+    
+    DOWNLOAD_URL="https://github.com/xvzc/spoofdpi/releases/download/${LATEST_TAG}/spoofdpi_${VERSION}_darwin_${SPOOF_ARCH}.tar.gz"
     echo -e "  URL  : ${BLUE}${DOWNLOAD_URL}${NC}"
     
     # Download tarball directly into bin folder
@@ -138,6 +145,8 @@ if [ ! -f "$SPOOF_BIN" ]; then
     
     # Remove tarball and leftover readme
     rm "${BIN_DIR}/spoofdpi.tar.gz" 2>/dev/null || true
+    rm "${BIN_DIR}/README.md" 2>/dev/null || true
+    rm "${BIN_DIR}/LICENSE" 2>/dev/null || true
     rm "${BIN_DIR}/README.md" 2>/dev/null || true
     rm "${BIN_DIR}/LICENSE" 2>/dev/null || true
     
@@ -157,7 +166,7 @@ sudo -v
 # Step 3: Start SpoofDPI locally
 echo -e "\n${YELLOW}[3/3] Launching SpoofDPI Proxy daemon...${NC}"
 # Run SpoofDPI in background
-"$SPOOF_BIN" -port $PROXY_PORT > /dev/null 2>&1 &
+"$SPOOF_BIN" --listen-addr "127.0.0.1:$PROXY_PORT" > /dev/null 2>&1 &
 SPOOF_PID=$!
 
 # Give it a second to bind to port

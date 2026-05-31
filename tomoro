@@ -1,0 +1,257 @@
+#!/bin/bash
+# Wifi Tomoro — CLI utama
+
+set -euo pipefail
+
+TOMORO_CMD="${1:-}"
+
+tomoro_source_libs() {
+    export TOMORO_REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    local lib_dir="${TOMORO_REPO_DIR}/lib"
+    # shellcheck source=lib/common.sh
+    source "${lib_dir}/common.sh"
+    # shellcheck source=lib/ui.sh
+    source "${lib_dir}/ui.sh"
+    # shellcheck source=lib/network.sh
+    source "${lib_dir}/network.sh"
+    # shellcheck source=lib/spoofdpi.sh
+    source "${lib_dir}/spoofdpi.sh"
+    # shellcheck source=lib/cleanup.sh
+    source "${lib_dir}/cleanup.sh"
+    tomoro_init_paths
+    tomoro_colors
+    tomoro_ui_dim_init
+}
+
+tomoro_resolve_cmd() {
+    local raw="${1:-}"
+    case "$raw" in
+        ""|start|run) echo "start" ;;
+        *) echo "$raw" ;;
+    esac
+}
+
+tomoro_doctor() {
+    tomoro_print_header
+    tomoro_log_info "Memeriksa lingkungan ..."
+    echo
+    local ok=1
+
+    if [[ "$(uname -s)" == "Darwin" ]]; then
+        tomoro_doctor_report "macOS" ok "Terdeteksi"
+    else
+        tomoro_doctor_report "macOS" err "Hanya mendukung macOS"
+        ok=0
+    fi
+
+    local cmd
+    for cmd in curl tar networksetup route sudo; do
+        if command -v "$cmd" >/dev/null 2>&1; then
+            tomoro_doctor_report "$cmd" ok "Tersedia"
+        else
+            tomoro_doctor_report "$cmd" err "Tidak ditemukan"
+            ok=0
+        fi
+    done
+
+    if [[ -x "${TOMORO_SPOOF_BIN}" ]]; then
+        tomoro_doctor_report "SpoofDPI" ok "${TOMORO_SPOOF_BIN}"
+    else
+        tomoro_doctor_report "SpoofDPI" warn "Jalankan: ./tomoro install"
+    fi
+
+    local active
+    active="$(tomoro_get_active_service)"
+    if [[ -n "$active" ]]; then
+        tomoro_doctor_report "Jaringan" ok "$active"
+    else
+        tomoro_doctor_report "Jaringan" warn "Belum ada rute default"
+    fi
+
+    if tomoro_port_in_use "${TOMORO_PROXY_PORT}"; then
+        tomoro_doctor_report "Port ${TOMORO_PROXY_PORT}" warn "Sedang dipakai"
+    else
+        tomoro_doctor_report "Port ${TOMORO_PROXY_PORT}" ok "Bebas"
+    fi
+
+    if tomoro_is_running; then
+        tomoro_doctor_report "Bypass" warn "Masih jalan (PID $(<"${TOMORO_PID_FILE}"))"
+    else
+        tomoro_doctor_report "Bypass" ok "Tidak aktif"
+    fi
+
+    echo
+    tomoro_ui_divider
+    echo
+    if [[ $ok -eq 1 ]]; then
+        tomoro_log_ok "Siap. Jalankan: ${TOMORO_BOLD}./tomoro start${TOMORO_NC}"
+    else
+        tomoro_log_err "Perbaiki item di atas, lalu ./tomoro doctor"
+        exit 1
+    fi
+}
+
+tomoro_cmd_status() {
+    tomoro_print_header
+    if tomoro_is_running; then
+        tomoro_read_saved_port
+        tomoro_ui_status_card "Bypass" on "PID $(<"${TOMORO_PID_FILE}") · port ${TOMORO_PROXY_PORT}"
+        local active
+        active="$(tomoro_get_active_service)"
+        if [[ -n "$active" ]]; then
+            tomoro_log_info "Proxy jaringan aktif:"
+            tomoro_show_proxy_status "$active"
+        fi
+        echo -e "  ${TOMORO_DIM}Hentikan:${TOMORO_NC} ${TOMORO_BOLD}./tomoro stop${TOMORO_NC}  atau  ${TOMORO_BOLD}Ctrl+C${TOMORO_NC} di terminal start"
+    else
+        tomoro_ui_status_card "Bypass" off "Tidak berjalan"
+        echo -e "  ${TOMORO_DIM}Mulai:${TOMORO_NC} ${TOMORO_BOLD}./tomoro start${TOMORO_NC}"
+    fi
+    echo
+}
+
+tomoro_cmd_install() {
+    tomoro_print_header
+    tomoro_require_macos
+    tomoro_require_commands
+    tomoro_ui_step 1 1 "Unduh SpoofDPI"
+    tomoro_install_spoofdpi
+    echo
+    tomoro_log_ok "Instalasi selesai."
+}
+
+tomoro_cmd_stop() {
+    tomoro_print_header
+    tomoro_require_macos
+    tomoro_ui_step 1 1 "Pulihkan pengaturan sistem"
+    if ! sudo -n true 2>/dev/null; then
+        tomoro_log_info "Butuh sudo untuk mematikan proxy ..."
+        sudo -v
+    fi
+    tomoro_read_saved_port
+    tomoro_cleanup
+    tomoro_reset_state
+    echo
+    tomoro_ui_status_card "Bypass" off "Proxy macOS dinonaktifkan"
+}
+
+tomoro_cmd_start() {
+    tomoro_print_header
+    tomoro_require_macos
+    tomoro_require_commands
+
+    if tomoro_is_running; then
+        tomoro_log_warn "Bypass sudah berjalan."
+        tomoro_log_info "Status: ./tomoro status · Stop: ./tomoro stop"
+        exit 0
+    fi
+
+    tomoro_ui_step 1 4 "Siapkan SpoofDPI"
+    tomoro_install_spoofdpi
+    echo
+
+    tomoro_ui_step 2 4 "Izin administrator (sudo)"
+    tomoro_log_info "Diperlukan untuk mengatur proxy sistem macOS."
+    sudo -v
+    echo
+
+    tomoro_ui_step 3 4 "Jalankan proxy lokal"
+    tomoro_ensure_state_dir
+    : >"${TOMORO_SERVICES_FILE}"
+    tomoro_start_spoofdpi
+    echo
+
+    tomoro_ui_step 4 4 "Lacak jaringan & aktifkan bypass"
+    local cleaning=0
+    tomoro_on_exit() {
+        if [[ $cleaning -eq 1 ]]; then
+            return 0
+        fi
+        cleaning=1
+        echo
+        tomoro_log_info "Membersihkan ..."
+        tomoro_cleanup
+        tomoro_reset_state
+    }
+    trap tomoro_on_exit SIGINT SIGTERM EXIT
+
+    tomoro_ui_success_banner
+
+    local prev_service="" active_service=""
+    while true; do
+        active_service="$(tomoro_get_active_service)"
+
+        if [[ -z "$active_service" ]]; then
+            if [[ -n "$prev_service" ]]; then
+                echo
+                tomoro_log_warn "Jaringan putus — proxy dimatikan sementara."
+                tomoro_disable_proxy_on_service "$prev_service"
+                prev_service=""
+            fi
+        elif [[ "$active_service" != "$prev_service" ]]; then
+            echo
+            tomoro_log_info "Jaringan: ${TOMORO_BOLD}${active_service}${TOMORO_NC}"
+            if [[ -n "$prev_service" ]]; then
+                tomoro_disable_proxy_on_service "$prev_service"
+            fi
+            tomoro_enable_proxy_on_service "$active_service"
+            prev_service="$active_service"
+            tomoro_flush_dns
+            tomoro_log_ok "Bypass terpasang"
+        fi
+
+        if ! tomoro_is_running; then
+            tomoro_log_err "SpoofDPI berhenti tiba-tiba."
+            exit 1
+        fi
+
+        sudo -n true 2>/dev/null || true
+        sleep 3
+    done
+}
+
+tomoro_cmd_version() {
+    tomoro_ui_logo
+    echo -e "  Versi ${TOMORO_BOLD}${TOMORO_VERSION}${TOMORO_NC}"
+    echo -e "  Repo  ${TOMORO_BLUE}https://github.com/Timcuan/wifi-tomoro${TOMORO_NC}"
+    echo
+}
+
+main() {
+    tomoro_source_libs
+    local cmd
+    cmd="$(tomoro_resolve_cmd "$TOMORO_CMD")"
+
+    case "$cmd" in
+        start)
+            tomoro_cmd_start
+            ;;
+        stop|off)
+            tomoro_cmd_stop
+            ;;
+        status|st)
+            tomoro_cmd_status
+            ;;
+        install|setup)
+            tomoro_cmd_install
+            ;;
+        doctor|check)
+            tomoro_doctor
+            ;;
+        version|-v|--version)
+            tomoro_cmd_version
+            ;;
+        help|-h|--help)
+            tomoro_usage
+            ;;
+        *)
+            tomoro_ui_logo
+            tomoro_log_err "Perintah tidak dikenal: ${TOMORO_CMD}"
+            echo
+            tomoro_usage
+            exit 1
+            ;;
+    esac
+}
+
+main "$@"

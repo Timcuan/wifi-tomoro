@@ -1,54 +1,162 @@
-# 📶 Wifi Tomoro: macOS Smart & Portable DPI Bypass 🚀
+# Wifi Tomoro
 
-Repository ini berisi **Smart Script Portable** khusus macOS untuk melewati pemblokiran internet (sensor DPI / Internet Positif / XL Axiata Block Page) secara otomatis dan aman. 
+[![macOS](https://img.shields.io/badge/platform-macOS-blue)](https://www.apple.com/macos/)
+[![CLI](https://img.shields.io/badge/cli-tomoro-cyan)](./tomoro)
+[![SpoofDPI](https://img.shields.io/badge/powered%20by-SpoofDPI-orange)](https://github.com/xvzc/spoofdpi)
 
-Script ini dirancang khusus agar **sama sekali tidak merugikan pengguna ketika berpindah jaringan atau mematikan alat**, karena memiliki sistem pemantauan dinamis dan pemulihan proxy otomatis.
+**Wifi Tomoro** adalah CLI untuk macOS yang membantu membuka akses internet di WiFi yang dibatasi (sensor DPI / halaman blokir ISP) — **tanpa VPN**. Cocok ketika **Cursor**, ChatGPT, Reddit, atau situs lain gagal terhubung di jaringan tertentu (mis. XL, IndiHome).
 
----
-
-## ✨ Fitur Unggulan
-
-* **🚀 100% Portable & Mandiri (Self-contained)**: Semua file binary (`SpoofDPI`) diunduh dan disimpan di dalam folder repositori (`bin/`). Tidak ada perubahan permanen di direktori sistem global Mac Anda.
-* **🌐 Deteksi Arsitektur Otomatis**: Secara cerdas mengenali apakah Mac Anda menggunakan chip Apple Silicon (`arm64`/M1/M2/M3) atau Intel (`amd64`) dan mengunduh versi yang tepat.
-* **🔄 Pelacak Jaringan Cerdas (Dynamic Network Tracking)**: 
-  * Jika Anda berpindah jaringan (misalnya dari Wi-Fi Rumah ke Hotspot HP, atau menyambungkan kabel Ethernet), script akan mendeteksi perubahan ini dalam 3 detik.
-  * Secara otomatis mematikan proxy di jaringan lama (agar internet tidak mati/macet) dan mengaktifkannya di jaringan yang baru aktif.
-* **🧹 Pembersihan Aman Otomatis (Graceful Cleanup)**: Begitu Anda menghentikan script ini (menekan `Ctrl+C` atau menutup Terminal), semua pengaturan proxy sistem macOS akan **langsung dinonaktifkan** secara otomatis. Internet Anda tidak akan pernah macet setelah alat ini ditutup!
+Semua binary dan state disimpan di folder proyek (`bin/`, `.tomoro/`). Tidak mengubah sistem Mac secara permanen.
 
 ---
 
-## 🛠 Cara Penggunaan
+## Fitur
 
-### 1. Kloning Repositori
-Jika Anda belum mengkloning repositori ini:
+- CLI **`tomoro`** — perintah jelas: start, stop, status, doctor
+- UI terminal — logo, langkah progres, kartu status
+- Unduh SpoofDPI otomatis (Apple Silicon & Intel)
+- Lacak ganti WiFi/hotspot (~3 detik)
+- Pulihkan proxy & DNS saat berhenti (`Ctrl+C` atau `stop`)
+
+---
+
+## Persyaratan
+
+- macOS 11+
+- `curl`, `sudo`, Terminal
+- Koneksi internet (unduhan pertama)
+
+---
+
+## Instalasi
+
 ```bash
 git clone https://github.com/Timcuan/wifi-tomoro.git
 cd wifi-tomoro
+chmod +x tomoro start.sh
 ```
 
-### 2. Jalankan Script
-Cukup jalankan satu perintah berikut di Terminal Anda:
+---
+
+## Penggunaan — langkah demi langkah
+
+### 1. Cek lingkungan (disarankan pertama kali)
+
 ```bash
-./start.sh
+./tomoro doctor
+```
+
+Pastikan item penting berstatus ✓.
+
+### 2. Aktifkan bypass
+
+```bash
+./tomoro start
+```
+
+- Masukkan **password Mac** saat diminta (`sudo`).
+- Tunggu banner **BYPASS AKTIF**.
+- **Biarkan terminal terbuka** selama dipakai.
+
+### 3. Uji koneksi
+
+Buka Cursor, browser, atau situs yang sebelumnya terblokir.
+
+### 4. Cek status (opsional)
+
+```bash
+./tomoro status
+```
+
+### 5. Matikan bypass
+
+**Di terminal yang sama:**
+
+```bash
+# Tekan Ctrl+C
+```
+
+**Atau dari terminal lain:**
+
+```bash
+./tomoro stop
 ```
 
 ---
 
-## 🔍 Cara Kerja Sistem
+## Perintah cepat
 
-1. **Unduh Binary Lokal**: Pertama kali dijalankan, script memeriksa keberadaan binary `spoofdpi` di folder `bin/`. Jika tidak ada, script akan mengunduhnya langsung dari rilis resmi GitHub.
-2. **Autentikasi Hak Akses**: Meminta kata sandi administrator (`sudo`) satu kali di awal untuk mendapatkan izin mengubah pengaturan Proxy Web macOS.
-3. **Jalankan Daemon**: Memulai `spoofdpi` di latar belakang pada port lokal `8080`.
-4. **Siklus Pemantauan (Monitoring Loop)**:
-   * Setiap 3 detik, mengecek adapter jaringan aktif (misal `en0`).
-   * Mengatur macOS HTTP & HTTPS Proxy di adapter tersebut ke `127.0.0.1:8080`.
-   * Jika adapter berubah, script mematikan proxy di adapter lama dan mengaktifkannya di adapter baru.
-5. **Pemulihan Saat Keluar**: Menangkap sinyal `Ctrl+C`, menghentikan proses `spoofdpi`, menonaktifkan semua konfigurasi proxy macOS, dan membersihkan cache DNS sistem.
+| Perintah | Fungsi |
+|----------|--------|
+| `./tomoro` | Aktifkan bypass |
+| `./tomoro stop` | Matikan & pulihkan sistem |
+| `./tomoro status` | Cek status |
+| `./tomoro doctor` | Diagnosa |
+| `./tomoro install` | Unduh SpoofDPI saja |
+| `./tomoro help` | Bantuan CLI |
+| `./tomoro version` | Versi |
+
+Port alternatif: `TOMORO_PORT=9090 ./tomoro start`
 
 ---
 
-## 💡 Mengapa Cursor Tidak Bisa Konek & Bagaimana Alat Ini Membantu?
+## Dokumentasi
 
-Editor **Cursor** (serta ChatGPT/Copilot/Reddit) menggunakan API yang sering kali melewati filter keamanan atau dideteksi secara keliru oleh *Deep Packet Inspection (DPI)* milik ISP seperti XL Axiata dan IndiHome, sehingga handshaking TLS diputus secara sepihak (*Connection Reset*).
+| Dokumen | Isi |
+|---------|-----|
+| [docs/PANDUAN.md](docs/PANDUAN.md) | **Panduan lengkap** langkah demi langkah (ID) |
+| [docs/CLI.md](docs/CLI.md) | Referensi perintah & variabel |
+| [CHANGELOG.md](CHANGELOG.md) | Riwayat perubahan versi |
 
-Dengan menjalankan `./start.sh`, paket data HTTP/HTTPS akan dimodifikasi sedikit di tingkat lokal (DPI Bypass) sehingga sensor ISP tidak dapat membacanya sebagai situs terlarang, memungkinkan **Cursor** dan situs-situs terblokir lainnya terhubung kembali secara instan dan 100% normal tanpa memerlukan VPN!
+---
+
+## Masalah umum
+
+| Gejala | Solusi |
+|--------|--------|
+| Internet macet setelah tutup terminal | `./tomoro stop` |
+| Port 8080 bentrok | `TOMORO_PORT=9090 ./tomoro start` |
+| SpoofDPI belum terunduh | `./tomoro install` |
+
+Detail: [docs/PANDUAN.md §8](docs/PANDUAN.md#8-masalah-umum)
+
+---
+
+## Cara kerja (ringkas)
+
+```mermaid
+flowchart LR
+  A[./tomoro start] --> B[SpoofDPI :8080]
+  B --> C[Proxy macOS]
+  C --> D[Traffic ke ISP]
+  D --> E[DPI bypass]
+```
+
+1. SpoofDPI berjalan di `127.0.0.1:8080`
+2. Proxy HTTP/HTTPS macOS diarahkan ke proxy lokal
+3. Paket dimodifikasi agar sensor ISP tidak memutus TLS
+4. Saat ganti jaringan, proxy dipindah otomatis
+5. Saat `stop` / `Ctrl+C`, semua dikembalikan
+
+---
+
+## Struktur proyek
+
+```
+wifi-tomoro/
+├── tomoro          # CLI utama
+├── start.sh        # Alias → tomoro start
+├── lib/            # Modul bash
+├── docs/           # Panduan & referensi
+├── bin/            # SpoofDPI (gitignored, diunduh otomatis)
+└── .tomoro/        # State sesi (gitignored)
+```
+
+---
+
+## Kredit & lisensi
+
+- [SpoofDPI](https://github.com/xvzc/spoofdpi) — Apache 2.0
+- Wifi Tomoro — wrapper & otomasi proxy macOS
+
+Gunakan sesuai hukum dan kebijakan jaringan di wilayah Anda.

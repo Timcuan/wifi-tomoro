@@ -2,7 +2,7 @@
 # INGFO TOMORO — banner, animasi, progress
 
 INGFO_TOMORO_NAME="${INGFO_TOMORO_NAME:-INGFO TOMORO}"
-TOMORO_VERSION="2.3.3"
+TOMORO_VERSION="2.4.0"
 TOMORO_TAGLINE="macOS WiFi bypass · DPI · GMGN & crypto"
 
 tomoro_ui_rule() {
@@ -140,16 +140,18 @@ tomoro_ui_run_with_spinner() {
 
 tomoro_usage() {
     tomoro_ui_logo
-    echo -e "${TOMORO_BOLD}Perintah${TOMORO_NC}"
+    echo -e "${TOMORO_BOLD}Perintah utama${TOMORO_NC}"
     echo
-    printf "  %-16s %s\n" "ingfo" "Menu interaktif"
-    printf "  %-16s %s\n" "ingfo start" "Aktifkan perisai"
-    printf "  %-16s %s\n" "ingfo stop" "Matikan & pulihkan sistem"
-    printf "  %-16s %s\n" "ingfo status" "Status bypass"
+    printf "  %-16s %s\n" "ingfo" "Menu ON / OFF + info mekanisme"
+    printf "  %-16s %s\n" "ingfo on" "Nyalakan bypass (sama: start)"
+    printf "  %-16s %s\n" "ingfo off" "Matikan bypass (sama: stop)"
+    echo
+    echo -e "${TOMORO_BOLD}Lainnya${TOMORO_NC}"
+    printf "  %-16s %s\n" "ingfo status" "Cek ON/OFF"
     printf "  %-16s %s\n" "ingfo test-crypto" "Uji GMGN & crypto"
-    printf "  %-16s %s\n" "ingfo start --ultra" "Mode ultra"
+    printf "  %-16s %s\n" "ingfo doctor" "Diagnosa sistem"
     echo
-    echo -e "${TOMORO_DIM}tomoro adalah alias dari ingfo${TOMORO_NC}"
+    echo -e "${TOMORO_DIM}tomoro = alias ingfo · ultra: ingfo on --ultra${TOMORO_NC}"
     echo
 }
 

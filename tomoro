@@ -46,7 +46,8 @@ tomoro_resolve_cmd() {
         return
     fi
     case "$raw" in
-        start|run) echo "start" ;;
+        start|run|on) echo "start" ;;
+        stop|off) echo "stop" ;;
         menu|tui|ui) echo "menu" ;;
         *) echo "$raw" ;;
     esac

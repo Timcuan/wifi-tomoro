@@ -35,32 +35,33 @@ chmod +x ingfo tomoro install.sh
 
 ---
 
-## Mulai — menu interaktif
+## Mulai — menu ON / OFF
 
 ```bash
 ingfo
-# atau
-cd ~/ingfo-tomoro && ./ingfo
 ```
 
-```
-  INGFO TOMORO
-  macOS WiFi bypass · DPI · GMGN & crypto
-  v2.3.3
-  --------------------------------------------
+Hanya dua kontrol + penjelasan mekanisme di layar:
 
-  Menu  ↑↓ pilih · Enter jalankan · q keluar
+| Menu | Fungsi |
+|------|--------|
+| **ON** | Nyalakan bypass (deep) — terminal ini harus tetap terbuka |
+| **OFF** | Matikan bypass, kembalikan proxy & DNS Mac |
 
-  > Aktifkan perisai (mode deep)
-    Aktifkan ultra (DPI keras)
-    ...
+Atau tanpa menu:
+
+```bash
+ingfo on    # nyalakan
+ingfo off   # matikan
 ```
 
 | Tombol | Aksi |
 |--------|------|
-| **↑ ↓** | Pilih menu |
+| **↑ ↓** | Pilih ON atau OFF |
 | **Enter** | Jalankan |
 | **q** | Keluar |
+
+Mekanisme lengkap: [docs/MEKANISME.md](docs/MEKANISME.md)
 
 ---
 

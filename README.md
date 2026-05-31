@@ -10,27 +10,29 @@ Menu interaktif (**↑↓ + Enter**), instalasi satu perintah, tampilan teks rap
 
 ---
 
-## Instalasi mudah
+## Instalasi — shortcut `ingfo`
 
-### Satu baris (disarankan)
+Satu perintah. Installer menaruh `ingfo` di `~/.local/bin` dan mengatur PATH otomatis.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Timcuan/wifi-tomoro/main/install.sh | bash
 ```
 
-Lalu tambahkan PATH (jika installer mengingatkan):
+Setelah itu, dari **terminal mana saja**:
 
 ```bash
-echo 'export PATH="${HOME}/.local/bin:$PATH"' >> ~/.zshrc && source ~/.zshrc
+ingfo        # menu ON / OFF
+ingfo on     # nyalakan
+ingfo off    # matikan
 ```
 
-### Manual
+Terminal baru langsung kenal `ingfo`. Di sesi install, shortcut sudah aktif tanpa restart.
+
+### Manual (opsional)
 
 ```bash
 git clone https://github.com/Timcuan/wifi-tomoro.git ~/ingfo-tomoro
-cd ~/ingfo-tomoro
-chmod +x ingfo tomoro install.sh
-./install.sh
+~/ingfo-tomoro/install.sh
 ```
 
 ---

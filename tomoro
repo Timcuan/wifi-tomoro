@@ -109,13 +109,20 @@ tomoro_doctor() {
         tomoro_doctor_report "Bypass" ok "Tidak aktif"
     fi
 
+    if command -v ingfo >/dev/null 2>&1; then
+        tomoro_doctor_report "Shortcut ingfo" ok "$(command -v ingfo)"
+    else
+        tomoro_doctor_report "Shortcut ingfo" warn "Jalankan: curl install.sh | bash"
+        ok=0
+    fi
+
     echo
     tomoro_ui_divider
     echo
     if [[ $ok -eq 1 ]]; then
-        tomoro_log_ok "Siap. Jalankan: ${TOMORO_BOLD}./tomoro start${TOMORO_NC} (mode deep default)"
+        tomoro_log_ok "Siap. Ketik: ${TOMORO_BOLD}ingfo${TOMORO_NC} lalu pilih ON"
     else
-        tomoro_log_err "Perbaiki item di atas, lalu ./tomoro doctor"
+        tomoro_log_err "Perbaiki item di atas, lalu ingfo doctor"
         exit 1
     fi
 }

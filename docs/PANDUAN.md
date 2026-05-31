@@ -52,16 +52,16 @@ cd wifi-tomoro
 chmod +x ingfo tomoro install.sh
 ```
 
-### Langkah 2.3 — (Opsional) Pasang di PATH
+### Langkah 2.3 — Shortcut `ingfo`
 
-Agar bisa memanggil dari folder mana saja:
+Installer otomatis memasang perintah global `ingfo`. Cek:
 
 ```bash
-echo 'export PATH="$PATH:/path/ke/wifi-tomoro"' >> ~/.zshrc
-source ~/.zshrc
+which ingfo
+ingfo
 ```
 
-Ganti `/path/ke/wifi-tomoro` dengan lokasi clone Anda.
+Jika belum ada: jalankan ulang `install.sh` atau `source ~/.zshrc`.
 
 ---
 

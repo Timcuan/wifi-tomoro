@@ -2,7 +2,7 @@
 # INGFO TOMORO — banner, animasi, progress
 
 INGFO_TOMORO_NAME="${INGFO_TOMORO_NAME:-INGFO TOMORO}"
-TOMORO_VERSION="2.4.0"
+TOMORO_VERSION="2.4.1"
 TOMORO_TAGLINE="macOS WiFi bypass · DPI · GMGN & crypto"
 
 tomoro_ui_rule() {

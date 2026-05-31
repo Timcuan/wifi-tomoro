@@ -1,17 +1,42 @@
 #!/bin/bash
-# Terminal UI — banner, tabel, progress, spinner.
+# INGFO TOMORO — banner, animasi, progress
 
-TOMORO_VERSION="2.2.0"
+INGFO_TOMORO_NAME="${INGFO_TOMORO_NAME:-INGFO TOMORO}"
+TOMORO_VERSION="2.3.0"
 
 tomoro_ui_logo() {
     echo -e "${TOMORO_CYAN}${TOMORO_BOLD}"
     cat <<'EOF'
-  ╦ ╦╦╔╗╔╔═╗  ╔╦╗╔═╗╔╗─╔═╗╦═╗╔═╗
-  ║║║║║║║║╣───║║║║ ║╠╩╗║ ║╠╦╝║╣
-  ╚╩╝╩╝╚╝╚═╝  ╩ ╩╚═╝╚═╝╚═╝╩╚═╚═╝
+    ___ _   _ _____ ___     _____ ___ ___ ___
+   |_ _| \ | |  ___/ _ \   |_   _| __| _ \ __|
+    | ||  \| | |_ | (_) |    | | | _||   / _|
+   |___|_|\_|_|___|\___/    |_| |___|_|_\___|
 EOF
-    echo -e "${TOMORO_NC}  ${TOMORO_DIM}macOS WiFi / DPI bypass · v${TOMORO_VERSION}${TOMORO_NC}"
+    echo -e "${TOMORO_NC}  ${TOMORO_MAGENTA}${TOMORO_BOLD}${INGFO_TOMORO_NAME}${TOMORO_NC}  ${TOMORO_DIM}· macOS WiFi unblock · v${TOMORO_VERSION}${TOMORO_NC}"
     echo
+}
+
+tomoro_ui_intro_animation() {
+    [[ ! -t 1 ]] && return 0
+    local frames=(
+        "Menyiapkan antarmuka"
+        "Menyiapkan antarmuka."
+        "Menyiapkan antarmuka.."
+        "Menyiapkan antarmuka..."
+    )
+    local spin=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧')
+    local i s=0
+    tomoro_tui_clear
+    tomoro_ui_logo
+    for i in "${!frames[@]}"; do
+        printf "\r  ${TOMORO_CYAN}%s${TOMORO_NC} %s" "${spin[$((s % ${#spin[@]}))]}" "${frames[$i]}"
+        s=$((s + 1))
+        sleep 0.12
+    done
+    printf "\r\033[K"
+    echo -e "  ${TOMORO_GREEN}[ok]${TOMORO_NC} Siap."
+    echo
+    sleep 0.2
 }
 
 tomoro_ui_dim_init() {
@@ -38,7 +63,14 @@ tomoro_ui_step() {
     local current="$1"
     local total="$2"
     local label="$3"
-    echo -e "${TOMORO_MAGENTA}${TOMORO_BOLD}  ▸ Langkah ${current}/${total}${TOMORO_NC} ${TOMORO_DIM}—${TOMORO_NC} ${label}"
+    local filled=$((current * 20 / total))
+    local bar=""
+    local i
+    for ((i = 0; i < 20; i++)); do
+        if (( i < filled )); then bar+="█"; else bar+="░"; fi
+    done
+    echo -e "${TOMORO_MAGENTA}${TOMORO_BOLD}  ▸ ${current}/${total}${TOMORO_NC} ${label}"
+    echo -e "  ${TOMORO_CYAN}[${bar}]${TOMORO_NC}"
 }
 
 tomoro_ui_divider() {
@@ -48,28 +80,28 @@ tomoro_ui_divider() {
 tomoro_ui_success_banner() {
     echo
     echo -e "  ${TOMORO_GREEN}${TOMORO_BOLD}╭──────────────────────────────────────────────────────────╮${TOMORO_NC}"
-    echo -e "  ${TOMORO_GREEN}${TOMORO_BOLD}│  🛡  PERISAI AKTIF — bypass DPI + DNS + multi-layer      │${TOMORO_NC}"
+    echo -e "  ${TOMORO_GREEN}${TOMORO_BOLD}│  🛡  ${INGFO_TOMORO_NAME} — PERISAI AKTIF                         │${TOMORO_NC}"
     echo -e "  ${TOMORO_GREEN}${TOMORO_BOLD}╰──────────────────────────────────────────────────────────╯${TOMORO_NC}"
     echo
     if declare -f tomoro_show_shield_status >/dev/null 2>&1; then
         tomoro_show_shield_status
         echo
     fi
-    echo -e "  ${TOMORO_DIM}Target:${TOMORO_NC} Cursor · ChatGPT · ${TOMORO_BOLD}GMGN · crypto DEX/CEX${TOMORO_NC}"
+    echo -e "  ${TOMORO_DIM}Target:${TOMORO_NC} GMGN · crypto · Cursor · ChatGPT"
     echo
     echo -e "  ${TOMORO_YELLOW}${TOMORO_BOLD}⚡ Penting${TOMORO_NC}"
     echo -e "     • Biarkan ${TOMORO_BOLD}terminal ini terbuka${TOMORO_NC}"
-    echo -e "     • Verifikasi : ${TOMORO_BOLD}./tomoro test${TOMORO_NC}"
-    echo -e "     • Berhenti   : ${TOMORO_BOLD}Ctrl+C${TOMORO_NC}  atau  ${TOMORO_BOLD}./tomoro stop${TOMORO_NC}"
+    echo -e "     • Menu lagi : buka terminal baru → ${TOMORO_BOLD}ingfo${TOMORO_NC}"
+    echo -e "     • Uji crypto : ${TOMORO_BOLD}ingfo test-crypto${TOMORO_NC}"
+    echo -e "     • Berhenti   : ${TOMORO_BOLD}Ctrl+C${TOMORO_NC} atau ${TOMORO_BOLD}ingfo stop${TOMORO_NC}"
     tomoro_ui_divider
     echo
 }
 
 tomoro_ui_status_card() {
     local title="$1"
-    local state="$2"   # on | off | warn
+    local state="$2"
     local detail="$3"
-
     local badge color
     case "$state" in
         on)   badge="● AKTIF";  color="${TOMORO_GREEN}" ;;
@@ -77,7 +109,6 @@ tomoro_ui_status_card() {
         warn) badge="◐ PERINGATAN"; color="${TOMORO_YELLOW}" ;;
         *)    badge="?"; color="${TOMORO_NC}" ;;
     esac
-
     echo -e "  ${color}${TOMORO_BOLD}${badge}${TOMORO_NC}  ${TOMORO_BOLD}${title}${TOMORO_NC}"
     [[ -n "$detail" ]] && echo -e "  ${TOMORO_DIM}${detail}${TOMORO_NC}"
     echo
@@ -109,37 +140,23 @@ tomoro_ui_run_with_spinner() {
 
 tomoro_usage() {
     tomoro_ui_logo
-    echo -e "${TOMORO_BOLD}Perintah${TOMORO_NC}"
+    echo -e "${TOMORO_BOLD}INGFO TOMORO — perintah${TOMORO_NC}"
     echo
-    printf "  ${TOMORO_CYAN}%-14s${TOMORO_NC} %s\n" "./tomoro" "Sama dengan start"
-    printf "  ${TOMORO_CYAN}%-14s${TOMORO_NC} %s\n" "start" "Aktifkan bypass (terminal tetap terbuka)"
-    printf "  ${TOMORO_CYAN}%-14s${TOMORO_NC} %s\n" "stop" "Matikan bypass & pulihkan proxy macOS"
-    printf "  ${TOMORO_CYAN}%-14s${TOMORO_NC} %s\n" "status" "Cek status bypass"
-    printf "  ${TOMORO_CYAN}%-14s${TOMORO_NC} %s\n" "install" "Unduh SpoofDPI ke bin/"
-    printf "  ${TOMORO_CYAN}%-14s${TOMORO_NC} %s\n" "doctor" "Diagnosa lingkungan"
-    printf "  ${TOMORO_CYAN}%-14s${TOMORO_NC} %s\n" "version" "Tampilkan versi"
-    printf "  ${TOMORO_CYAN}%-14s${TOMORO_NC} %s\n" "test-crypto" "Uji GMGN, DEX, CEX, RPC via proxy"
-    printf "  ${TOMORO_CYAN}%-14s${TOMORO_NC} %s\n" "start --deep" "Mode deep (default)"
-    printf "  ${TOMORO_CYAN}%-14s${TOMORO_NC} %s\n" "start --standard" "Mode ringan"
-    printf "  ${TOMORO_CYAN}%-14s${TOMORO_NC} %s\n" "help" "Bantuan ini"
+    printf "  ${TOMORO_CYAN}%-16s${TOMORO_NC} %s\n" "ingfo" "Menu interaktif (↑↓ Enter)"
+    printf "  ${TOMORO_CYAN}%-16s${TOMORO_NC} %s\n" "ingfo start" "Aktifkan perisai"
+    printf "  ${TOMORO_CYAN}%-16s${TOMORO_NC} %s\n" "ingfo stop" "Matikan & pulihkan"
+    printf "  ${TOMORO_CYAN}%-16s${TOMORO_NC} %s\n" "ingfo status" "Status bypass"
+    printf "  ${TOMORO_CYAN}%-16s${TOMORO_NC} %s\n" "ingfo test-crypto" "Uji GMGN & crypto"
+    printf "  ${TOMORO_CYAN}%-16s${TOMORO_NC} %s\n" "ingfo start --ultra" "Mode ultra"
     echo
-    echo -e "${TOMORO_BOLD}Opsi${TOMORO_NC}"
-    echo -e "  ${TOMORO_DIM}TOMORO_PORT=9090${TOMORO_NC}       Ganti port HTTP (default 8080)"
-    echo -e "  ${TOMORO_DIM}TOMORO_MODE=standard${TOMORO_NC}  Mode ringan"
-    echo -e "  ${TOMORO_DIM}TOMORO_SOCKS_ENABLE=0${TOMORO_NC}   Matikan SOCKS (deep mode)"
-    echo -e "  ${TOMORO_DIM}TOMORO_DNS_DOH_URL=...${TOMORO_NC}  Ganti resolver DoH"
-    echo
-    echo -e "${TOMORO_BOLD}Dokumentasi${TOMORO_NC}"
-    echo -e "  ${TOMORO_BLUE}docs/PANDUAN.md${TOMORO_NC}  Panduan langkah demi langkah"
-    echo -e "  ${TOMORO_BLUE}CHANGELOG.md${TOMORO_NC}     Riwayat perubahan"
+    echo -e "${TOMORO_DIM}tomoro = alias ingfo${TOMORO_NC}"
     echo
 }
 
 tomoro_doctor_report() {
     local label="$1"
-    local state="$2"  # ok warn err
+    local state="$2"
     local note="${3:-}"
-
     local icon color
     case "$state" in
         ok)   icon="✓"; color="${TOMORO_GREEN}" ;;
@@ -148,6 +165,6 @@ tomoro_doctor_report() {
         *)    icon="·"; color="${TOMORO_NC}" ;;
     esac
     printf "  ${color}%s${TOMORO_NC} %-22s" "$icon" "$label"
-    [[ -n "$note" ]] && printf "${TOMORO_DIM}%s${TOMORO_NC}" "$note"
+    [[ -n "$note" ]] && printf " ${TOMORO_DIM}%s${TOMORO_NC}" "$note"
     echo
 }

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Wifi Tomoro — CLI utama
+# INGFO TOMORO — mesin CLI (tomoro = alias)
 
 set -euo pipefail
 
@@ -12,6 +12,8 @@ tomoro_source_libs() {
     local lib_dir="${TOMORO_REPO_DIR}/lib"
     # shellcheck source=lib/common.sh
     source "${lib_dir}/common.sh"
+    # shellcheck source=lib/tui.sh
+    source "${lib_dir}/tui.sh"
     # shellcheck source=lib/ui.sh
     source "${lib_dir}/ui.sh"
     # shellcheck source=lib/config.sh
@@ -33,10 +35,23 @@ tomoro_source_libs() {
 
 tomoro_resolve_cmd() {
     local raw="${1:-}"
+    if [[ -z "$raw" ]]; then
+        if [[ -t 1 ]]; then
+            echo "menu"
+        else
+            echo "help"
+        fi
+        return
+    fi
     case "$raw" in
-        ""|start|run) echo "start" ;;
+        start|run) echo "start" ;;
+        menu|tui|ui) echo "menu" ;;
         *) echo "$raw" ;;
     esac
+}
+
+tomoro_cmd_menu() {
+    tomoro_tui_main
 }
 
 tomoro_doctor() {
@@ -277,8 +292,7 @@ tomoro_cmd_start() {
 
 tomoro_cmd_version() {
     tomoro_ui_logo
-    echo -e "  Versi ${TOMORO_BOLD}${TOMORO_VERSION}${TOMORO_NC}"
-    echo -e "  Mode  ${TOMORO_BOLD}deep${TOMORO_NC} (default) · standard tersedia"
+    echo -e "  ${INGFO_TOMORO_NAME} ${TOMORO_BOLD}v${TOMORO_VERSION}${TOMORO_NC}"
     echo -e "  Repo  ${TOMORO_BLUE}https://github.com/Timcuan/wifi-tomoro${TOMORO_NC}"
     echo
 }
@@ -289,6 +303,9 @@ main() {
     cmd="$(tomoro_resolve_cmd "$TOMORO_CMD")"
 
     case "$cmd" in
+        menu|tui)
+            tomoro_cmd_menu
+            ;;
         start)
             tomoro_cmd_start
             ;;

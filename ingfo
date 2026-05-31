@@ -1,0 +1,5 @@
+#!/bin/bash
+# INGFO TOMORO — pintu masuk utama
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export INGFO_TOMORO=1
+exec "${DIR}/tomoro" "$@"

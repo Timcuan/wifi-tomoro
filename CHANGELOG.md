@@ -4,6 +4,20 @@ Semua perubahan penting pada proyek ini didokumentasikan di file ini.
 
 Format mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.0.0/), dan versi mengikuti [Semantic Versioning](https://semver.org/lang/id/).
 
+## [2.3.0] - 2026-05-31
+
+### Ditambahkan
+
+- Brand **INGFO TOMORO** — logo, `ingfo` sebagai CLI utama
+- Menu interaktif **↑↓ Enter** + animasi intro (`lib/tui.sh`)
+- `install.sh` — clone, symlink `~/.local/bin/ingfo`, progress animasi
+- Progress bar pada langkah start
+
+### Diubah
+
+- `./ingfo` tanpa argumen → menu (bukan langsung start)
+- `tomoro` tetap alias ke `ingfo`
+
 ## [2.2.0] - 2026-05-31
 
 ### Ditambahkan
@@ -67,6 +81,7 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.0.0/), dan v
 - Pelacakan perubahan jaringan dan proxy dinamis
 - Pembersihan otomatis saat `Ctrl+C` (proxy + DNS flush)
 
+[2.3.0]: https://github.com/Timcuan/wifi-tomoro/compare/v2.2.0...v2.3.0
 [2.2.0]: https://github.com/Timcuan/wifi-tomoro/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/Timcuan/wifi-tomoro/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/Timcuan/wifi-tomoro/compare/v1.0.0...v2.0.0

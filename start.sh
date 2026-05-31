@@ -1,3 +1,3 @@
 #!/bin/bash
-# Alias kompatibilitas — gunakan ./tomoro untuk perintah lengkap.
-exec "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/tomoro" start "$@"
+# Alias — gunakan ingfo
+exec "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/ingfo" start "$@"

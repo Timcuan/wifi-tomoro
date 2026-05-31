@@ -1,6 +1,6 @@
-# Panduan Wifi Tomoro — Langkah demi Langkah
+# Panduan INGFO TOMORO — Langkah demi Langkah
 
-Panduan ini untuk pengguna macOS yang ingin membuka akses internet terbatas di WiFi (sensor DPI / blokir ISP) tanpa VPN.
+**INGFO TOMORO** membantu membuka akses internet di WiFi yang dibatasi di macOS. Gunakan menu interaktif `ingfo` (↑↓ Enter) atau perintah langsung.
 
 ---
 
@@ -32,19 +32,24 @@ Pastikan Anda memiliki:
 
 ## 2. Instalasi proyek
 
-### Langkah 2.1 — Clone repositori
+### Langkah 2.1 — Clone & install
 
-Buka Terminal, lalu jalankan:
+```bash
+curl -fsSL https://raw.githubusercontent.com/Timcuan/wifi-tomoro/main/install.sh | bash
+```
+
+Atau manual:
 
 ```bash
 git clone https://github.com/Timcuan/wifi-tomoro.git
 cd wifi-tomoro
+./install.sh
 ```
 
-### Langkah 2.2 — Beri izin eksekusi
+### Langkah 2.2 — Beri izin eksekusi (jika manual)
 
 ```bash
-chmod +x tomoro start.sh
+chmod +x ingfo tomoro install.sh
 ```
 
 ### Langkah 2.3 — (Opsional) Pasang di PATH
@@ -74,17 +79,18 @@ Anda harus melihat tanda **✓** untuk macOS, perintah sistem, dan port. Jika Sp
 
 ## 4. Aktifkan bypass
 
-### Langkah 4.1 — Start
+### Langkah 4.1 — Menu atau start
 
 ```bash
-./tomoro start
+ingfo
 ```
 
-Atau (sama):
+Pilih **Aktifkan perisai** dengan ↑↓ lalu Enter.
+
+Atau langsung:
 
 ```bash
-./tomoro
-./start.sh
+ingfo start
 ```
 
 ### Langkah 4.2 — Masukkan password

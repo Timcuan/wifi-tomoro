@@ -2,17 +2,12 @@
 # INGFO TOMORO — banner, animasi, progress
 
 INGFO_TOMORO_NAME="${INGFO_TOMORO_NAME:-INGFO TOMORO}"
-TOMORO_VERSION="2.3.0"
+TOMORO_VERSION="2.3.1"
 
 tomoro_ui_logo() {
     echo -e "${TOMORO_CYAN}${TOMORO_BOLD}"
-    cat <<'EOF'
-    ___ _   _ _____ ___     _____ ___ ___ ___
-   |_ _| \ | |  ___/ _ \   |_   _| __| _ \ __|
-    | ||  \| | |_ | (_) |    | | | _||   / _|
-   |___|_|\_|_|___|\___/    |_| |___|_|_\___|
-EOF
-    echo -e "${TOMORO_NC}  ${TOMORO_MAGENTA}${TOMORO_BOLD}${INGFO_TOMORO_NAME}${TOMORO_NC}  ${TOMORO_DIM}· macOS WiFi unblock · v${TOMORO_VERSION}${TOMORO_NC}"
+    tomoro_print_logo_art
+    echo -e "${TOMORO_NC}  ${TOMORO_MAGENTA}${TOMORO_BOLD}${INGFO_TOMORO_NAME}${TOMORO_NC}  ${TOMORO_DIM}· WiFi · DPI · GMGN · v${TOMORO_VERSION}${TOMORO_NC}"
     echo
 }
 

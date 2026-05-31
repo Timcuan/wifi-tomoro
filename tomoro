@@ -12,6 +12,8 @@ tomoro_source_libs() {
     local lib_dir="${TOMORO_REPO_DIR}/lib"
     # shellcheck source=lib/common.sh
     source "${lib_dir}/common.sh"
+    # shellcheck source=lib/logo.sh
+    source "${lib_dir}/logo.sh"
     # shellcheck source=lib/tui.sh
     source "${lib_dir}/tui.sh"
     # shellcheck source=lib/ui.sh

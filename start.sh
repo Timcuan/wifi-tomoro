@@ -143,12 +143,11 @@ if [ ! -f "$SPOOF_BIN" ]; then
     echo -e "  Extracting..."
     tar -xzf "${BIN_DIR}/spoofdpi.tar.gz" -C "$BIN_DIR"
     
-    # Remove tarball and leftover readme
+    # Remove tarball and leftover release assets
     rm "${BIN_DIR}/spoofdpi.tar.gz" 2>/dev/null || true
     rm "${BIN_DIR}/README.md" 2>/dev/null || true
     rm "${BIN_DIR}/LICENSE" 2>/dev/null || true
-    rm "${BIN_DIR}/README.md" 2>/dev/null || true
-    rm "${BIN_DIR}/LICENSE" 2>/dev/null || true
+    rm "${BIN_DIR}/CHANGELOG.md" 2>/dev/null || true
     
     # Ensure binary is executable
     chmod +x "$SPOOF_BIN"

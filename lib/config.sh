@@ -87,6 +87,9 @@ EOF
     fi
     echo "${TOMORO_MODE}" >"${TOMORO_MODE_FILE}"
     [[ "${TOMORO_ULTRA}" == "1" ]] && echo "ultra" >>"${TOMORO_MODE_FILE}"
+    if declare -f tomoro_append_crypto_rules_to_config >/dev/null 2>&1; then
+        tomoro_append_crypto_rules_to_config
+    fi
 }
 
 tomoro_spoofdpi_http_args() {

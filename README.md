@@ -62,7 +62,10 @@ Pastikan item penting berstatus ✓.
 
 ```bash
 ./tomoro test
+./tomoro test-crypto   # GMGN, Dexscreener, Binance, Jupiter, …
 ```
+
+Catatan GMGN: curl bisa 403 (Cloudflare) — normal. Yang penting **browser** load setelah bypass aktif.
 
 ### 4. Uji aplikasi
 
@@ -120,7 +123,7 @@ Port alternatif: `TOMORO_PORT=9090 ./tomoro start`
 | Dokumen | Isi |
 |---------|-----|
 | [docs/PANDUAN.md](docs/PANDUAN.md) | **Panduan lengkap** langkah demi langkah (ID) |
-| [docs/KEAMANAN.md](docs/KEAMANAN.md) | Lapisan perlindungan & batas teknis |
+| [docs/CRYPTO.md](docs/CRYPTO.md) | GMGN & situs crypto — evaluasi & uji |
 | [docs/CLI.md](docs/CLI.md) | Referensi perintah & variabel |
 | [CHANGELOG.md](CHANGELOG.md) | Riwayat perubahan versi |
 

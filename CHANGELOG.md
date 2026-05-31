@@ -4,6 +4,15 @@ Semua perubahan penting pada proyek ini didokumentasikan di file ini.
 
 Format mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.0.0/), dan versi mengikuti [Semantic Versioning](https://semver.org/lang/id/).
 
+## [2.2.0] - 2026-05-31
+
+### Ditambahkan
+
+- Rules SpoofDPI prioritas **crypto** (GMGN, DEX, CEX, wallet RPC) dengan TLS disorder
+- `./tomoro test-crypto` — uji GMGN, Dexscreener, Binance, Jupiter, dll.
+- Logika uji pintar: HTTP 403 Cloudflare = TLS OK (bukan blok ISP)
+- [docs/CRYPTO.md](docs/CRYPTO.md) — evaluasi & panduan crypto/GMGN
+
 ## [2.1.0] - 2026-05-31
 
 ### Ditambahkan
@@ -58,6 +67,7 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.0.0/), dan v
 - Pelacakan perubahan jaringan dan proxy dinamis
 - Pembersihan otomatis saat `Ctrl+C` (proxy + DNS flush)
 
+[2.2.0]: https://github.com/Timcuan/wifi-tomoro/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/Timcuan/wifi-tomoro/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/Timcuan/wifi-tomoro/compare/v1.0.0...v2.0.0
 [1.0.0]: https://github.com/Timcuan/wifi-tomoro/releases/tag/v1.0.0

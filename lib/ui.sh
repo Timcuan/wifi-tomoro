@@ -1,7 +1,7 @@
 #!/bin/bash
 # Terminal UI — banner, tabel, progress, spinner.
 
-TOMORO_VERSION="2.1.0"
+TOMORO_VERSION="2.2.0"
 
 tomoro_ui_logo() {
     echo -e "${TOMORO_CYAN}${TOMORO_BOLD}"
@@ -55,7 +55,7 @@ tomoro_ui_success_banner() {
         tomoro_show_shield_status
         echo
     fi
-    echo -e "  ${TOMORO_DIM}Target:${TOMORO_NC} Cursor · ChatGPT · Reddit · TLS/SNI terblokir"
+    echo -e "  ${TOMORO_DIM}Target:${TOMORO_NC} Cursor · ChatGPT · ${TOMORO_BOLD}GMGN · crypto DEX/CEX${TOMORO_NC}"
     echo
     echo -e "  ${TOMORO_YELLOW}${TOMORO_BOLD}⚡ Penting${TOMORO_NC}"
     echo -e "     • Biarkan ${TOMORO_BOLD}terminal ini terbuka${TOMORO_NC}"
@@ -118,7 +118,7 @@ tomoro_usage() {
     printf "  ${TOMORO_CYAN}%-14s${TOMORO_NC} %s\n" "install" "Unduh SpoofDPI ke bin/"
     printf "  ${TOMORO_CYAN}%-14s${TOMORO_NC} %s\n" "doctor" "Diagnosa lingkungan"
     printf "  ${TOMORO_CYAN}%-14s${TOMORO_NC} %s\n" "version" "Tampilkan versi"
-    printf "  ${TOMORO_CYAN}%-14s${TOMORO_NC} %s\n" "test" "Uji endpoint via proxy (saat aktif)"
+    printf "  ${TOMORO_CYAN}%-14s${TOMORO_NC} %s\n" "test-crypto" "Uji GMGN, DEX, CEX, RPC via proxy"
     printf "  ${TOMORO_CYAN}%-14s${TOMORO_NC} %s\n" "start --deep" "Mode deep (default)"
     printf "  ${TOMORO_CYAN}%-14s${TOMORO_NC} %s\n" "start --standard" "Mode ringan"
     printf "  ${TOMORO_CYAN}%-14s${TOMORO_NC} %s\n" "help" "Bantuan ini"

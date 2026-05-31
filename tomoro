@@ -24,6 +24,8 @@ tomoro_source_libs() {
     source "${lib_dir}/cleanup.sh"
     # shellcheck source=lib/health.sh
     source "${lib_dir}/health.sh"
+    # shellcheck source=lib/crypto.sh
+    source "${lib_dir}/crypto.sh"
     tomoro_init_paths
     tomoro_colors
     tomoro_ui_dim_init
@@ -133,6 +135,22 @@ tomoro_cmd_test() {
     fi
     tomoro_show_shield_status
     tomoro_run_health_check 1
+    echo
+    tomoro_log_info "Crypto (GMGN, dll.): ${TOMORO_BOLD}./tomoro test-crypto${TOMORO_NC}"
+}
+
+tomoro_cmd_test_crypto() {
+    tomoro_print_header
+    if ! tomoro_is_running; then
+        tomoro_log_warn "Bypass belum aktif — baseline langsung:"
+        tomoro_run_crypto_health_check 0
+        echo
+        tomoro_log_info "Aktifkan: ./tomoro start · lalu ./tomoro test-crypto"
+        exit 1
+    fi
+    tomoro_show_shield_status
+    tomoro_log_info "Rules crypto aktif di SpoofDPI (GMGN, DEX, CEX, wallet RPC)"
+    tomoro_run_crypto_health_check 1
 }
 
 tomoro_cmd_install() {
@@ -282,6 +300,9 @@ main() {
             ;;
         test|probe)
             tomoro_cmd_test
+            ;;
+        test-crypto|crypto)
+            tomoro_cmd_test_crypto
             ;;
         install|setup)
             tomoro_cmd_install

@@ -58,7 +58,7 @@ tomoro_restore_dns_for_service() {
     backup_file="${TOMORO_DNS_BACKUP_DIR}/${slug}"
     [[ ! -f "$backup_file" ]] && return 0
 
-    echo -e "  ${TOMORO_YELLOW}→${TOMORO_NC} DNS dipulihkan: ${TOMORO_BOLD}${service}${TOMORO_NC}"
+    echo -e "  ${TOMORO_YELLOW}*${TOMORO_NC} DNS dipulihkan: ${TOMORO_BOLD}${service}${TOMORO_NC}"
     if grep -qx "DHCP" "$backup_file" 2>/dev/null; then
         sudo networksetup -setdnsservers "$service" Empty
     else
@@ -81,7 +81,7 @@ tomoro_harden_dns_for_service() {
     local service="$1"
     [[ -z "$service" ]] && return 0
     tomoro_backup_dns_for_service "$service"
-    echo -e "  ${TOMORO_GREEN}→${TOMORO_NC} DNS aman (DoH-ready): ${TOMORO_BOLD}${service}${TOMORO_NC}"
+    echo -e "  ${TOMORO_GREEN}+${TOMORO_NC} DNS aman (DoH-ready): ${TOMORO_BOLD}${service}${TOMORO_NC}"
     sudo networksetup -setdnsservers "$service" 1.1.1.1 8.8.8.8
 }
 
@@ -90,7 +90,7 @@ tomoro_disable_ipv6_for_service() {
     [[ -z "$service" ]] && return 0
     [[ "${TOMORO_MODE:-deep}" != "deep" ]] && return 0
     grep -Fxq "$service" "${TOMORO_IPV6_OFF_FILE}" 2>/dev/null && return 0
-    echo -e "  ${TOMORO_GREEN}→${TOMORO_NC} IPv6 off (cegah leak): ${TOMORO_BOLD}${service}${TOMORO_NC}"
+    echo -e "  ${TOMORO_GREEN}+${TOMORO_NC} IPv6 off (cegah leak): ${TOMORO_BOLD}${service}${TOMORO_NC}"
     sudo networksetup -setv6off "$service"
     echo "$service" >>"${TOMORO_IPV6_OFF_FILE}"
 }
@@ -100,7 +100,7 @@ tomoro_restore_ipv6_for_service() {
     [[ -z "$service" ]] && return 0
     [[ ! -f "${TOMORO_IPV6_OFF_FILE}" ]] && return 0
     grep -Fxq "$service" "${TOMORO_IPV6_OFF_FILE}" 2>/dev/null || return 0
-    echo -e "  ${TOMORO_YELLOW}→${TOMORO_NC} IPv6 dipulihkan: ${TOMORO_BOLD}${service}${TOMORO_NC}"
+    echo -e "  ${TOMORO_YELLOW}*${TOMORO_NC} IPv6 dipulihkan: ${TOMORO_BOLD}${service}${TOMORO_NC}"
     sudo networksetup -setv6automatic "$service" 2>/dev/null || true
     grep -Fxv "$service" "${TOMORO_IPV6_OFF_FILE}" >"${TOMORO_IPV6_OFF_FILE}.tmp" 2>/dev/null || true
     mv "${TOMORO_IPV6_OFF_FILE}.tmp" "${TOMORO_IPV6_OFF_FILE}" 2>/dev/null || rm -f "${TOMORO_IPV6_OFF_FILE}"
@@ -127,14 +127,14 @@ tomoro_enable_proxy_on_service() {
     local service="$1"
     [[ -z "$service" ]] && return 0
 
-    echo -e "  ${TOMORO_GREEN}→${TOMORO_NC} Proxy HTTP/S: ${TOMORO_BOLD}${service}${TOMORO_NC} → 127.0.0.1:${TOMORO_PROXY_PORT}"
+    echo -e "  ${TOMORO_GREEN}+${TOMORO_NC} Proxy HTTP/S: ${TOMORO_BOLD}${service}${TOMORO_NC} -> 127.0.0.1:${TOMORO_PROXY_PORT}"
     sudo networksetup -setwebproxy "$service" 127.0.0.1 "${TOMORO_PROXY_PORT}"
     sudo networksetup -setsecurewebproxy "$service" 127.0.0.1 "${TOMORO_PROXY_PORT}"
     sudo networksetup -setwebproxystate "$service" on
     sudo networksetup -setsecurewebproxystate "$service" on
 
     if [[ "${TOMORO_SOCKS_ENABLE:-0}" == "1" ]] && [[ -f "${TOMORO_SOCKS_PID_FILE}" ]]; then
-        echo -e "  ${TOMORO_GREEN}→${TOMORO_NC} Proxy SOCKS: ${TOMORO_BOLD}${service}${TOMORO_NC} → 127.0.0.1:${TOMORO_SOCKS_PORT}"
+        echo -e "  ${TOMORO_GREEN}+${TOMORO_NC} Proxy SOCKS: ${TOMORO_BOLD}${service}${TOMORO_NC} -> 127.0.0.1:${TOMORO_SOCKS_PORT}"
         sudo networksetup -setsocksfirewallproxy "$service" 127.0.0.1 "${TOMORO_SOCKS_PORT}"
         sudo networksetup -setsocksfirewallproxystate "$service" on
     fi
@@ -157,7 +157,7 @@ tomoro_disable_proxy_on_service() {
     local service="$1"
     [[ -z "$service" ]] && return 0
 
-    echo -e "  ${TOMORO_YELLOW}→${TOMORO_NC} Proxy dimatikan: ${TOMORO_BOLD}${service}${TOMORO_NC}"
+    echo -e "  ${TOMORO_YELLOW}*${TOMORO_NC} Proxy dimatikan: ${TOMORO_BOLD}${service}${TOMORO_NC}"
     sudo networksetup -setwebproxystate "$service" off
     sudo networksetup -setsecurewebproxystate "$service" off
     sudo networksetup -setsocksfirewallproxystate "$service" off 2>/dev/null || true

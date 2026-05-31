@@ -6,7 +6,7 @@
 
 **INGFO TOMORO** — CLI interaktif untuk macOS: buka akses internet di WiFi terbatas (DPI / blokir ISP) tanpa VPN. GMGN, crypto, Cursor, ChatGPT, dan situs terblokir lain.
 
-Menu **↑↓ + Enter**, animasi, instalasi satu perintah.
+Menu interaktif (**↑↓ + Enter**), instalasi satu perintah, tampilan teks rapi tanpa ASCII art.
 
 ---
 
@@ -44,16 +44,14 @@ cd ~/ingfo-tomoro && ./ingfo
 ```
 
 ```
-    ___ _   _ _____ ___     _____ ___ ___ ___
-   |_ _| \ | |  ___/ _ \   |_   _| __| _ \ __|
-    | ||  \| | |_ | (_) |    | | | _||   / _|
-   |___|_|\_|_|___|\___/    |_| |___|_|_\___|
-
-  INGFO TOMORO · macOS WiFi unblock
+  INGFO TOMORO
+  macOS WiFi bypass · DPI · GMGN & crypto
+  v2.3.3
+  --------------------------------------------
 
   Menu  ↑↓ pilih · Enter jalankan · q keluar
 
-  ▶ Aktifkan perisai (mode deep)
+  > Aktifkan perisai (mode deep)
     Aktifkan ultra (DPI keras)
     ...
 ```

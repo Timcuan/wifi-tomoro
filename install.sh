@@ -11,6 +11,7 @@ CYAN='\033[0;36m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 RED='\033[0;31m'
+MAGENTA='\033[0;35m'
 BOLD='\033[1m'
 DIM='\033[2m'
 NC='\033[0m'
@@ -35,14 +36,10 @@ ingfo_step_fail() {
 }
 
 ingfo_banner() {
-    echo -e "${CYAN}${BOLD}"
-    cat <<'EOF'
-  ___ _   _ _____ ___     _____ ___ ___ ___  
- / __| | | |  ___| _ \   |_   _| _ \ __| _ \
-| (__| |_| | |_  |  __/    | | |   / _||   /
- \___|\___/|___| |_|      |_| |_|_\___|_|_\
-EOF
-    echo -e "${NC}  ${BOLD}INGFO TOMORO${NC} ${DIM}— installer macOS${NC}"
+    echo
+    echo -e "  ${MAGENTA}${BOLD}INGFO${NC} ${CYAN}${BOLD}TOMORO${NC}"
+    echo -e "  ${DIM}Installer · macOS WiFi bypass${NC}"
+    echo -e "  ${DIM}----------------------------------------${NC}"
     echo
 }
 

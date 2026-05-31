@@ -54,9 +54,9 @@ tomoro_tui_draw_menu() {
     tomoro_tui_clear
     tomoro_ui_logo
     if [[ "$running" == "1" ]]; then
-        echo -e "  ${TOMORO_GREEN}${TOMORO_BOLD}● PERISAI AKTIF${TOMORO_NC} ${TOMORO_DIM}— biarkan terminal start terbuka${TOMORO_NC}"
+        echo -e "  ${TOMORO_GREEN}${TOMORO_BOLD}[aktif]${TOMORO_NC} Perisai ${TOMORO_DIM}(biarkan terminal start terbuka)${TOMORO_NC}"
     else
-        echo -e "  ${TOMORO_DIM}○ Perisai nonaktif${TOMORO_NC}"
+        echo -e "  ${TOMORO_DIM}[mati] Perisai nonaktif${TOMORO_NC}"
     fi
     echo
     echo -e "  ${TOMORO_BOLD}Menu${TOMORO_NC}  ${TOMORO_DIM}↑↓ pilih · Enter jalankan · q keluar${TOMORO_NC}"
@@ -64,7 +64,7 @@ tomoro_tui_draw_menu() {
 
     for ((i = 0; i < count; i++)); do
         if (( i == selected )); then
-            pointer="${TOMORO_CYAN}${TOMORO_BOLD}▶${TOMORO_NC}"
+            pointer="${TOMORO_CYAN}${TOMORO_BOLD}>${TOMORO_NC}"
             label="${TOMORO_CYAN}${TOMORO_BOLD}${items[$i]}${TOMORO_NC}"
         else
             pointer=" "
@@ -73,8 +73,10 @@ tomoro_tui_draw_menu() {
         printf "  %s %b\n" "$pointer" "$label"
     done
     echo
-    echo -e "  ${TOMORO_DIM}────────────────────────────────────────────────────────────${TOMORO_NC}"
-    echo -e "  ${TOMORO_DIM}GMGN · crypto · Cursor · ChatGPT · WiFi restricted${TOMORO_NC}"
+    if declare -f tomoro_ui_rule >/dev/null 2>&1; then
+        echo -e "  ${TOMORO_DIM}$(tomoro_ui_rule 60)${TOMORO_NC}"
+    fi
+    echo -e "  ${TOMORO_DIM}GMGN · crypto · Cursor · WiFi restricted${TOMORO_NC}"
 }
 
 tomoro_tui_run_action() {

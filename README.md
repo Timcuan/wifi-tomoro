@@ -95,6 +95,7 @@ Mekanisme lengkap: [docs/MEKANISME.md](docs/MEKANISME.md)
 
 | File | Isi |
 |------|-----|
+| [docs/MEKANISME.md](docs/MEKANISME.md) | Cara kerja ON/OFF |
 | [docs/PANDUAN.md](docs/PANDUAN.md) | Panduan lengkap |
 | [docs/CRYPTO.md](docs/CRYPTO.md) | GMGN & crypto |
 | [docs/KEAMANAN.md](docs/KEAMANAN.md) | Lapisan perlindungan |

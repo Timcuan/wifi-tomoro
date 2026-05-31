@@ -12,6 +12,7 @@ Dokumen ini menjelaskan **seberapa dalam** tool ini melawan pembatasan WiFi, dan
 | IPv6 leak | Blokir hanya IPv4 | **IPv6 off** sementara di mode deep (dipulihkan saat stop) |
 | Ganti interface | Proxy hanya di Wi-Fi aktif | **Semua interface** di-hard di mode deep |
 | Aplikasi non-proxy | Abaikan proxy macOS | SOCKS5 tambahan (deep) + proxy HTTP/S |
+| **GMGN / crypto** | DPI pada SNI DEX/CEX | **Rules crypto** + `./tomoro test-crypto` |
 
 ## Mode bypass
 

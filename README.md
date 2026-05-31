@@ -12,11 +12,11 @@ Semua binary dan state disimpan di folder proyek (`bin/`, `.tomoro/`). Tidak men
 
 ## Fitur
 
-- CLI **`tomoro`** — perintah jelas: start, stop, status, doctor
+- **Mode deep (default)** — DoH, TLS disorder, DNS publik, IPv6 off, proxy di semua interface, SOCKS5
+- **Mode ultra** — fake TLS packets untuk DPI paling keras (`./tomoro start --ultra`)
+- CLI **`tomoro`** — start, stop, status, **test**, doctor
 - UI terminal — logo, langkah progres, kartu status
-- Unduh SpoofDPI otomatis (Apple Silicon & Intel)
-- Lacak ganti WiFi/hotspot (~3 detik)
-- Pulihkan proxy & DNS saat berhenti (`Ctrl+C` atau `stop`)
+- Pulihkan proxy, DNS, IPv6 saat berhenti (`Ctrl+C` atau `stop`)
 
 ---
 
@@ -55,20 +55,33 @@ Pastikan item penting berstatus ✓.
 ```
 
 - Masukkan **password Mac** saat diminta (`sudo`).
-- Tunggu banner **BYPASS AKTIF**.
+- Tunggu banner **PERISAI AKTIF**.
 - **Biarkan terminal terbuka** selama dipakai.
 
-### 3. Uji koneksi
+### 3. Verifikasi bypass
+
+```bash
+./tomoro test
+```
+
+### 4. Uji aplikasi
 
 Buka Cursor, browser, atau situs yang sebelumnya terblokir.
 
-### 4. Cek status (opsional)
+Masih gagal? Coba mode lebih agresif:
+
+```bash
+./tomoro stop
+./tomoro start --ultra
+```
+
+### 5. Cek status (opsional)
 
 ```bash
 ./tomoro status
 ```
 
-### 5. Matikan bypass
+### 6. Matikan bypass
 
 **Di terminal yang sama:**
 
@@ -92,7 +105,9 @@ Buka Cursor, browser, atau situs yang sebelumnya terblokir.
 | `./tomoro stop` | Matikan & pulihkan sistem |
 | `./tomoro status` | Cek status |
 | `./tomoro doctor` | Diagnosa |
-| `./tomoro install` | Unduh SpoofDPI saja |
+| `./tomoro test` | Verifikasi koneksi via proxy |
+| `./tomoro start --ultra` | DPI paling agresif (sudo pada daemon) |
+| `./tomoro start --standard` | Mode ringan |
 | `./tomoro help` | Bantuan CLI |
 | `./tomoro version` | Versi |
 
@@ -105,6 +120,7 @@ Port alternatif: `TOMORO_PORT=9090 ./tomoro start`
 | Dokumen | Isi |
 |---------|-----|
 | [docs/PANDUAN.md](docs/PANDUAN.md) | **Panduan lengkap** langkah demi langkah (ID) |
+| [docs/KEAMANAN.md](docs/KEAMANAN.md) | Lapisan perlindungan & batas teknis |
 | [docs/CLI.md](docs/CLI.md) | Referensi perintah & variabel |
 | [CHANGELOG.md](CHANGELOG.md) | Riwayat perubahan versi |
 
@@ -125,18 +141,27 @@ Detail: [docs/PANDUAN.md §8](docs/PANDUAN.md#8-masalah-umum)
 ## Cara kerja (ringkas)
 
 ```mermaid
-flowchart LR
-  A[./tomoro start] --> B[SpoofDPI :8080]
-  B --> C[Proxy macOS]
-  C --> D[Traffic ke ISP]
-  D --> E[DPI bypass]
+flowchart TB
+  subgraph macOS["macOS — mode deep"]
+    P[Proxy HTTP/S + SOCKS semua interface]
+    D[DNS 1.1.1.1 / 8.8.8.8]
+    V[IPv6 off sementara]
+  end
+  subgraph local["Lokal"]
+    S[SpoofDPI :8080 / :1080]
+    H[DoH + TLS disorder + fragment]
+  end
+  P --> S
+  S --> H
+  H --> ISP[ISP / WiFi]
+  D --> ISP
 ```
 
-1. SpoofDPI berjalan di `127.0.0.1:8080`
-2. Proxy HTTP/HTTPS macOS diarahkan ke proxy lokal
-3. Paket dimodifikasi agar sensor ISP tidak memutus TLS
-4. Saat ganti jaringan, proxy dipindah otomatis
-5. Saat `stop` / `Ctrl+C`, semua dikembalikan
+1. SpoofDPI: DoH + manipulasi TLS Client Hello (anti-DPI)
+2. Proxy sistem + SOCKS menangkap traffic aplikasi
+3. DNS publik + flush — hindari poisoning resolver ISP
+4. Semua interface di-hard — tidak bocor saat ganti WiFi
+5. `stop` / `Ctrl+C` mengembalikan DNS, IPv6, proxy
 
 ---
 

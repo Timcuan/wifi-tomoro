@@ -1,7 +1,7 @@
 #!/bin/bash
 # Terminal UI — banner, tabel, progress, spinner.
 
-TOMORO_VERSION="2.0.0"
+TOMORO_VERSION="2.1.0"
 
 tomoro_ui_logo() {
     echo -e "${TOMORO_CYAN}${TOMORO_BOLD}"
@@ -48,14 +48,19 @@ tomoro_ui_divider() {
 tomoro_ui_success_banner() {
     echo
     echo -e "  ${TOMORO_GREEN}${TOMORO_BOLD}╭──────────────────────────────────────────────────────────╮${TOMORO_NC}"
-    echo -e "  ${TOMORO_GREEN}${TOMORO_BOLD}│  ✓  BYPASS AKTIF — internet terbatas seharusnya normal   │${TOMORO_NC}"
+    echo -e "  ${TOMORO_GREEN}${TOMORO_BOLD}│  🛡  PERISAI AKTIF — bypass DPI + DNS + multi-layer      │${TOMORO_NC}"
     echo -e "  ${TOMORO_GREEN}${TOMORO_BOLD}╰──────────────────────────────────────────────────────────╯${TOMORO_NC}"
     echo
-    echo -e "  ${TOMORO_DIM}Akses:${TOMORO_NC} Cursor · ChatGPT · Reddit · situs terblokir lain"
+    if declare -f tomoro_show_shield_status >/dev/null 2>&1; then
+        tomoro_show_shield_status
+        echo
+    fi
+    echo -e "  ${TOMORO_DIM}Target:${TOMORO_NC} Cursor · ChatGPT · Reddit · TLS/SNI terblokir"
     echo
     echo -e "  ${TOMORO_YELLOW}${TOMORO_BOLD}⚡ Penting${TOMORO_NC}"
     echo -e "     • Biarkan ${TOMORO_BOLD}terminal ini terbuka${TOMORO_NC}"
-    echo -e "     • Berhenti : ${TOMORO_BOLD}Ctrl+C${TOMORO_NC}  atau  ${TOMORO_BOLD}./tomoro stop${TOMORO_NC}"
+    echo -e "     • Verifikasi : ${TOMORO_BOLD}./tomoro test${TOMORO_NC}"
+    echo -e "     • Berhenti   : ${TOMORO_BOLD}Ctrl+C${TOMORO_NC}  atau  ${TOMORO_BOLD}./tomoro stop${TOMORO_NC}"
     tomoro_ui_divider
     echo
 }
@@ -113,10 +118,16 @@ tomoro_usage() {
     printf "  ${TOMORO_CYAN}%-14s${TOMORO_NC} %s\n" "install" "Unduh SpoofDPI ke bin/"
     printf "  ${TOMORO_CYAN}%-14s${TOMORO_NC} %s\n" "doctor" "Diagnosa lingkungan"
     printf "  ${TOMORO_CYAN}%-14s${TOMORO_NC} %s\n" "version" "Tampilkan versi"
+    printf "  ${TOMORO_CYAN}%-14s${TOMORO_NC} %s\n" "test" "Uji endpoint via proxy (saat aktif)"
+    printf "  ${TOMORO_CYAN}%-14s${TOMORO_NC} %s\n" "start --deep" "Mode deep (default)"
+    printf "  ${TOMORO_CYAN}%-14s${TOMORO_NC} %s\n" "start --standard" "Mode ringan"
     printf "  ${TOMORO_CYAN}%-14s${TOMORO_NC} %s\n" "help" "Bantuan ini"
     echo
     echo -e "${TOMORO_BOLD}Opsi${TOMORO_NC}"
-    echo -e "  ${TOMORO_DIM}TOMORO_PORT=9090${TOMORO_NC}  Ganti port lokal (default 8080)"
+    echo -e "  ${TOMORO_DIM}TOMORO_PORT=9090${TOMORO_NC}       Ganti port HTTP (default 8080)"
+    echo -e "  ${TOMORO_DIM}TOMORO_MODE=standard${TOMORO_NC}  Mode ringan"
+    echo -e "  ${TOMORO_DIM}TOMORO_SOCKS_ENABLE=0${TOMORO_NC}   Matikan SOCKS (deep mode)"
+    echo -e "  ${TOMORO_DIM}TOMORO_DNS_DOH_URL=...${TOMORO_NC}  Ganti resolver DoH"
     echo
     echo -e "${TOMORO_BOLD}Dokumentasi${TOMORO_NC}"
     echo -e "  ${TOMORO_BLUE}docs/PANDUAN.md${TOMORO_NC}  Panduan langkah demi langkah"

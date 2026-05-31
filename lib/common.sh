@@ -12,6 +12,7 @@ tomoro_init_paths() {
     TOMORO_SERVICES_FILE="${TOMORO_STATE_DIR}/services"
     TOMORO_PORT_FILE="${TOMORO_STATE_DIR}/port"
     TOMORO_PROXY_PORT="${TOMORO_PORT:-8080}"
+    tomoro_init_config
 }
 
 tomoro_colors() {

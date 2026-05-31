@@ -4,6 +4,8 @@
 set -euo pipefail
 
 TOMORO_CMD="${1:-}"
+shift || true
+TOMORO_ARGS=("$@")
 
 tomoro_source_libs() {
     export TOMORO_REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -12,12 +14,16 @@ tomoro_source_libs() {
     source "${lib_dir}/common.sh"
     # shellcheck source=lib/ui.sh
     source "${lib_dir}/ui.sh"
+    # shellcheck source=lib/config.sh
+    source "${lib_dir}/config.sh"
     # shellcheck source=lib/network.sh
     source "${lib_dir}/network.sh"
     # shellcheck source=lib/spoofdpi.sh
     source "${lib_dir}/spoofdpi.sh"
     # shellcheck source=lib/cleanup.sh
     source "${lib_dir}/cleanup.sh"
+    # shellcheck source=lib/health.sh
+    source "${lib_dir}/health.sh"
     tomoro_init_paths
     tomoro_colors
     tomoro_ui_dim_init
@@ -45,7 +51,7 @@ tomoro_doctor() {
     fi
 
     local cmd
-    for cmd in curl tar networksetup route sudo; do
+    for cmd in curl tar networksetup route sudo shasum; do
         if command -v "$cmd" >/dev/null 2>&1; then
             tomoro_doctor_report "$cmd" ok "Tersedia"
         else
@@ -60,22 +66,25 @@ tomoro_doctor() {
         tomoro_doctor_report "SpoofDPI" warn "Jalankan: ./tomoro install"
     fi
 
+    tomoro_doctor_report "Mode default" ok "$(tomoro_mode_label)"
+
     local active
     active="$(tomoro_get_active_service)"
     if [[ -n "$active" ]]; then
-        tomoro_doctor_report "Jaringan" ok "$active"
+        tomoro_doctor_report "Jaringan aktif" ok "$active"
     else
-        tomoro_doctor_report "Jaringan" warn "Belum ada rute default"
+        tomoro_doctor_report "Jaringan aktif" warn "Belum ada rute default"
     fi
 
     if tomoro_port_in_use "${TOMORO_PROXY_PORT}"; then
-        tomoro_doctor_report "Port ${TOMORO_PROXY_PORT}" warn "Sedang dipakai"
+        tomoro_doctor_report "Port HTTP ${TOMORO_PROXY_PORT}" warn "Sedang dipakai"
     else
-        tomoro_doctor_report "Port ${TOMORO_PROXY_PORT}" ok "Bebas"
+        tomoro_doctor_report "Port HTTP ${TOMORO_PROXY_PORT}" ok "Bebas"
     fi
 
     if tomoro_is_running; then
-        tomoro_doctor_report "Bypass" warn "Masih jalan (PID $(<"${TOMORO_PID_FILE}"))"
+        tomoro_doctor_report "Bypass HTTP" warn "Aktif PID $(<"${TOMORO_PID_FILE}")"
+        tomoro_is_socks_running && tomoro_doctor_report "Bypass SOCKS" ok "Port ${TOMORO_SOCKS_PORT}"
     else
         tomoro_doctor_report "Bypass" ok "Tidak aktif"
     fi
@@ -84,7 +93,7 @@ tomoro_doctor() {
     tomoro_ui_divider
     echo
     if [[ $ok -eq 1 ]]; then
-        tomoro_log_ok "Siap. Jalankan: ${TOMORO_BOLD}./tomoro start${TOMORO_NC}"
+        tomoro_log_ok "Siap. Jalankan: ${TOMORO_BOLD}./tomoro start${TOMORO_NC} (mode deep default)"
     else
         tomoro_log_err "Perbaiki item di atas, lalu ./tomoro doctor"
         exit 1
@@ -95,19 +104,35 @@ tomoro_cmd_status() {
     tomoro_print_header
     if tomoro_is_running; then
         tomoro_read_saved_port
-        tomoro_ui_status_card "Bypass" on "PID $(<"${TOMORO_PID_FILE}") · port ${TOMORO_PROXY_PORT}"
+        local detail="PID $(<"${TOMORO_PID_FILE}") · HTTP :${TOMORO_PROXY_PORT}"
+        tomoro_is_socks_running && detail+=" · SOCKS :${TOMORO_SOCKS_PORT}"
+        tomoro_ui_status_card "Bypass" on "$detail"
+        tomoro_show_shield_status
+        echo
         local active
         active="$(tomoro_get_active_service)"
         if [[ -n "$active" ]]; then
-            tomoro_log_info "Proxy jaringan aktif:"
+            tomoro_log_info "Jaringan aktif:"
             tomoro_show_proxy_status "$active"
         fi
-        echo -e "  ${TOMORO_DIM}Hentikan:${TOMORO_NC} ${TOMORO_BOLD}./tomoro stop${TOMORO_NC}  atau  ${TOMORO_BOLD}Ctrl+C${TOMORO_NC} di terminal start"
+        echo
+        echo -e "  ${TOMORO_DIM}Uji:${TOMORO_NC} ${TOMORO_BOLD}./tomoro test${TOMORO_NC} · Stop: ${TOMORO_BOLD}./tomoro stop${TOMORO_NC}"
     else
         tomoro_ui_status_card "Bypass" off "Tidak berjalan"
         echo -e "  ${TOMORO_DIM}Mulai:${TOMORO_NC} ${TOMORO_BOLD}./tomoro start${TOMORO_NC}"
     fi
     echo
+}
+
+tomoro_cmd_test() {
+    tomoro_print_header
+    if ! tomoro_is_running; then
+        tomoro_log_warn "Bypass belum aktif. Jalankan ./tomoro start dulu."
+        tomoro_run_health_check 0
+        exit 1
+    fi
+    tomoro_show_shield_status
+    tomoro_run_health_check 1
 }
 
 tomoro_cmd_install() {
@@ -125,43 +150,55 @@ tomoro_cmd_stop() {
     tomoro_require_macos
     tomoro_ui_step 1 1 "Pulihkan pengaturan sistem"
     if ! sudo -n true 2>/dev/null; then
-        tomoro_log_info "Butuh sudo untuk mematikan proxy ..."
+        tomoro_log_info "Butuh sudo untuk mematikan proxy/DNS ..."
         sudo -v
     fi
     tomoro_read_saved_port
     tomoro_cleanup
     tomoro_reset_state
     echo
-    tomoro_ui_status_card "Bypass" off "Proxy macOS dinonaktifkan"
+    tomoro_ui_status_card "Bypass" off "Semua lapisan dinonaktifkan"
 }
 
 tomoro_cmd_start() {
+    tomoro_parse_start_flags "${TOMORO_ARGS[@]}"
     tomoro_print_header
     tomoro_require_macos
     tomoro_require_commands
 
     if tomoro_is_running; then
         tomoro_log_warn "Bypass sudah berjalan."
-        tomoro_log_info "Status: ./tomoro status · Stop: ./tomoro stop"
+        tomoro_log_info "Status: ./tomoro status · Test: ./tomoro test · Stop: ./tomoro stop"
         exit 0
     fi
 
-    tomoro_ui_step 1 4 "Siapkan SpoofDPI"
+    tomoro_ui_step 1 5 "Siapkan SpoofDPI ($(tomoro_mode_label))"
     tomoro_install_spoofdpi
     echo
 
-    tomoro_ui_step 2 4 "Izin administrator (sudo)"
-    tomoro_log_info "Diperlukan untuk mengatur proxy sistem macOS."
+    tomoro_ui_step 2 5 "Izin administrator (sudo)"
+    tomoro_log_info "Proxy HTTP/S, DNS, dan IPv6 (deep) membutuhkan sudo."
     sudo -v
     echo
 
-    tomoro_ui_step 3 4 "Jalankan proxy lokal"
+    tomoro_ui_step 3 5 "Jalankan daemon bypass"
     tomoro_ensure_state_dir
     : >"${TOMORO_SERVICES_FILE}"
     tomoro_start_spoofdpi
     echo
 
-    tomoro_ui_step 4 4 "Lacak jaringan & aktifkan bypass"
+    tomoro_ui_step 4 5 "Pasang perisai sistem macOS"
+    if [[ "${TOMORO_MODE}" == "deep" ]]; then
+        tomoro_apply_deep_to_all_services
+    else
+        local active
+        active="$(tomoro_get_active_service)"
+        [[ -n "$active" ]] && tomoro_enable_proxy_on_service "$active"
+    fi
+    tomoro_flush_dns
+    echo
+
+    tomoro_ui_step 5 5 "Pantau jaringan"
     local cleaning=0
     tomoro_on_exit() {
         if [[ $cleaning -eq 1 ]]; then
@@ -169,7 +206,7 @@ tomoro_cmd_start() {
         fi
         cleaning=1
         echo
-        tomoro_log_info "Membersihkan ..."
+        tomoro_log_info "Membersihkan semua lapisan ..."
         tomoro_cleanup
         tomoro_reset_state
     }
@@ -181,27 +218,37 @@ tomoro_cmd_start() {
     while true; do
         active_service="$(tomoro_get_active_service)"
 
-        if [[ -z "$active_service" ]]; then
-            if [[ -n "$prev_service" ]]; then
-                echo
-                tomoro_log_warn "Jaringan putus — proxy dimatikan sementara."
-                tomoro_disable_proxy_on_service "$prev_service"
+        if [[ "${TOMORO_MODE}" == "deep" ]]; then
+            if [[ -z "$active_service" ]]; then
+                [[ -n "$prev_service" ]] && tomoro_log_warn "Jaringan putus — daemon tetap jalan."
                 prev_service=""
+            elif [[ "$active_service" != "$prev_service" ]]; then
+                echo
+                tomoro_log_info "Rute aktif: ${TOMORO_BOLD}${active_service}${TOMORO_NC} (perisai sudah di semua interface)"
+                tomoro_flush_dns
+                prev_service="$active_service"
             fi
-        elif [[ "$active_service" != "$prev_service" ]]; then
-            echo
-            tomoro_log_info "Jaringan: ${TOMORO_BOLD}${active_service}${TOMORO_NC}"
-            if [[ -n "$prev_service" ]]; then
-                tomoro_disable_proxy_on_service "$prev_service"
+        else
+            if [[ -z "$active_service" ]]; then
+                if [[ -n "$prev_service" ]]; then
+                    echo
+                    tomoro_log_warn "Jaringan putus — proxy dimatikan sementara."
+                    tomoro_disable_proxy_on_service "$prev_service"
+                    prev_service=""
+                fi
+            elif [[ "$active_service" != "$prev_service" ]]; then
+                echo
+                tomoro_log_info "Jaringan: ${TOMORO_BOLD}${active_service}${TOMORO_NC}"
+                [[ -n "$prev_service" ]] && tomoro_disable_proxy_on_service "$prev_service"
+                tomoro_enable_proxy_on_service "$active_service"
+                prev_service="$active_service"
+                tomoro_flush_dns
+                tomoro_log_ok "Bypass terpasang"
             fi
-            tomoro_enable_proxy_on_service "$active_service"
-            prev_service="$active_service"
-            tomoro_flush_dns
-            tomoro_log_ok "Bypass terpasang"
         fi
 
         if ! tomoro_is_running; then
-            tomoro_log_err "SpoofDPI berhenti tiba-tiba."
+            tomoro_log_err "SpoofDPI berhenti tiba-tiba. Lihat: ${TOMORO_LOG_FILE}"
             exit 1
         fi
 
@@ -213,6 +260,7 @@ tomoro_cmd_start() {
 tomoro_cmd_version() {
     tomoro_ui_logo
     echo -e "  Versi ${TOMORO_BOLD}${TOMORO_VERSION}${TOMORO_NC}"
+    echo -e "  Mode  ${TOMORO_BOLD}deep${TOMORO_NC} (default) · standard tersedia"
     echo -e "  Repo  ${TOMORO_BLUE}https://github.com/Timcuan/wifi-tomoro${TOMORO_NC}"
     echo
 }
@@ -231,6 +279,9 @@ main() {
             ;;
         status|st)
             tomoro_cmd_status
+            ;;
+        test|probe)
+            tomoro_cmd_test
             ;;
         install|setup)
             tomoro_cmd_install

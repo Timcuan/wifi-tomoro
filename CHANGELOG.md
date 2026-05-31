@@ -4,6 +4,27 @@ Semua perubahan penting pada proyek ini didokumentasikan di file ini.
 
 Format mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.0.0/), dan versi mengikuti [Semantic Versioning](https://semver.org/lang/id/).
 
+## [2.1.0] - 2026-05-31
+
+### Ditambahkan
+
+- Mode **deep** (default): DoH, TLS disorder, fragment chunk, DNS publik sistem, IPv6 off, proxy di semua interface
+- Mode **deep --ultra**: fake TLS packets (daemon SpoofDPI via sudo, paling agresif)
+- Proxy **SOCKS5** paralel (port 1080) untuk aplikasi non-HTTP-proxy
+- Perintah `./tomoro test` — verifikasi endpoint via proxy
+- Dokumen [docs/KEAMANAN.md](docs/KEAMANAN.md) — lapisan perlindungan & batas teknis
+- Backup/restore DNS per interface; log SpoofDPI di `.tomoro/spoofdpi.log`
+
+### Diubah
+
+- SpoofDPI memakai profil TOML + flag CLI selaras (dns-mode `https`)
+- Start flow 5 langkah dengan perisai sistem macOS
+
+### Diperbaiki
+
+- Hindari `fake-count` default yang memicu error pcap tanpa root
+- Pemulihan IPv6 dan DNS lebih andal (metadata SERVICE di backup)
+
 ## [2.0.0] - 2026-05-31
 
 ### Ditambahkan
@@ -37,5 +58,6 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.0.0/), dan v
 - Pelacakan perubahan jaringan dan proxy dinamis
 - Pembersihan otomatis saat `Ctrl+C` (proxy + DNS flush)
 
+[2.1.0]: https://github.com/Timcuan/wifi-tomoro/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/Timcuan/wifi-tomoro/compare/v1.0.0...v2.0.0
 [1.0.0]: https://github.com/Timcuan/wifi-tomoro/releases/tag/v1.0.0

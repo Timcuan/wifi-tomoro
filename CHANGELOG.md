@@ -4,6 +4,21 @@ Semua perubahan penting pada proyek ini didokumentasikan di file ini.
 
 Format mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.0.0/), dan versi mengikuti [Semantic Versioning](https://semver.org/lang/id/).
 
+## [2.5.0] - 2026-05-31
+
+### Ditambahkan
+
+- `lib/anim.sh` — spinner, progress bar animasi, brand reveal
+- Menu layar alternatif (history terminal bersih)
+- Hint kontekstual ON/OFF · toggle mekanisme dengan `?`
+- Fokus pintar: ON jika mati, OFF jika aktif
+
+### Diubah
+
+- Intro `ingfo`: reveal brand + spinner
+- Start: progress bar `█░` per langkah
+- OFF dari menu: spinner tanpa header ganda
+
 ## [2.3.0] - 2026-05-31
 
 ### Ditambahkan

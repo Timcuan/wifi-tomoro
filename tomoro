@@ -14,6 +14,8 @@ tomoro_source_libs() {
     source "${lib_dir}/common.sh"
     # shellcheck source=lib/logo.sh
     source "${lib_dir}/logo.sh"
+    # shellcheck source=lib/anim.sh
+    source "${lib_dir}/anim.sh"
     # shellcheck source=lib/tui.sh
     source "${lib_dir}/tui.sh"
     # shellcheck source=lib/ui.sh
@@ -191,7 +193,7 @@ tomoro_cmd_install() {
 }
 
 tomoro_cmd_stop() {
-    tomoro_print_header
+    [[ "${TOMORO_SKIP_HEADER:-0}" != "1" ]] && tomoro_print_header
     tomoro_require_macos
     tomoro_ui_step 1 1 "Pulihkan pengaturan sistem"
     if ! sudo -n true 2>/dev/null; then
@@ -202,7 +204,11 @@ tomoro_cmd_stop() {
     tomoro_cleanup
     tomoro_reset_state
     echo
-    tomoro_ui_status_card "Bypass" off "Semua lapisan dinonaktifkan"
+    if declare -f tomoro_anim_flash >/dev/null 2>&1; then
+        tomoro_anim_flash "Perisai OFF — sistem dipulihkan" "${TOMORO_YELLOW}"
+    else
+        tomoro_ui_status_card "Bypass" off "Semua lapisan dinonaktifkan"
+    fi
 }
 
 tomoro_cmd_start() {

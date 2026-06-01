@@ -2,7 +2,7 @@
 # INGFO TOMORO — banner, animasi, progress
 
 INGFO_TOMORO_NAME="${INGFO_TOMORO_NAME:-INGFO TOMORO}"
-TOMORO_VERSION="2.4.1"
+TOMORO_VERSION="2.5.0"
 TOMORO_TAGLINE="macOS WiFi bypass · DPI · GMGN & crypto"
 
 tomoro_ui_rule() {
@@ -25,26 +25,11 @@ tomoro_ui_logo() {
 }
 
 tomoro_ui_intro_animation() {
-    [[ ! -t 1 ]] && return 0
-    local frames=(
-        "Menyiapkan antarmuka"
-        "Menyiapkan antarmuka."
-        "Menyiapkan antarmuka.."
-        "Menyiapkan antarmuka..."
-    )
-    local spin=('|' '/' '-' '\')
-    local i s=0
-    tomoro_tui_clear
-    tomoro_ui_logo
-    for i in "${!frames[@]}"; do
-        printf "\r  ${TOMORO_CYAN}%s${TOMORO_NC} %s" "${spin[$((s % 4))]}" "${frames[$i]}"
-        s=$((s + 1))
-        sleep 0.12
-    done
-    printf "\r\033[K"
-    echo -e "  ${TOMORO_GREEN}[ok]${TOMORO_NC} Siap."
-    echo
-    sleep 0.2
+    if declare -f tomoro_anim_intro >/dev/null 2>&1; then
+        tomoro_anim_intro
+    else
+        tomoro_ui_logo
+    fi
 }
 
 tomoro_ui_dim_init() {
@@ -67,13 +52,15 @@ tomoro_ui_step() {
     local current="$1"
     local total="$2"
     local label="$3"
-    local filled=$((current * 20 / total))
-    local bar="" i
-    for ((i = 0; i < 20; i++)); do
-        if (( i < filled )); then bar+="#"; else bar+="-"; fi
-    done
-    echo -e "${TOMORO_MAGENTA}${TOMORO_BOLD}  Langkah ${current}/${total}${TOMORO_NC}  ${label}"
-    echo -e "  ${TOMORO_CYAN}[${bar}]${TOMORO_NC}"
+    if declare -f tomoro_anim_progress_animate >/dev/null 2>&1 && [[ -t 1 ]]; then
+        tomoro_anim_progress_animate "$current" "$total" "$label"
+    else
+        echo -e "${TOMORO_MAGENTA}${TOMORO_BOLD}  [${current}/${total}]${TOMORO_NC} ${label}"
+    fi
+}
+
+tomoro_ui_step_done() {
+    :
 }
 
 tomoro_ui_divider() {
@@ -82,7 +69,11 @@ tomoro_ui_divider() {
 
 tomoro_ui_success_banner() {
     echo
-    tomoro_log_ok "Perisai aktif — ${INGFO_TOMORO_NAME}"
+    if declare -f tomoro_anim_flash >/dev/null 2>&1; then
+        tomoro_anim_flash "Perisai ON — ${INGFO_TOMORO_NAME}" "${TOMORO_GREEN}"
+    else
+        tomoro_log_ok "Perisai aktif — ${INGFO_TOMORO_NAME}"
+    fi
     echo
     if declare -f tomoro_show_shield_status >/dev/null 2>&1; then
         tomoro_show_shield_status
@@ -91,9 +82,8 @@ tomoro_ui_success_banner() {
     echo -e "  ${TOMORO_DIM}Target:${TOMORO_NC} GMGN, crypto, Cursor, ChatGPT"
     echo
     echo -e "  ${TOMORO_YELLOW}${TOMORO_BOLD}Penting${TOMORO_NC}"
-    echo -e "    Biarkan terminal ini terbuka"
-    echo -e "    Uji: ${TOMORO_BOLD}ingfo test-crypto${TOMORO_NC}"
-    echo -e "    Stop: ${TOMORO_BOLD}Ctrl+C${TOMORO_NC} atau ${TOMORO_BOLD}ingfo stop${TOMORO_NC}"
+    echo -e "    Terminal ini tetap terbuka"
+    echo -e "    OFF dari terminal lain: ${TOMORO_BOLD}ingfo off${TOMORO_NC}"
     tomoro_ui_divider
     echo
 }
@@ -115,43 +105,32 @@ tomoro_ui_status_card() {
 }
 
 tomoro_ui_spinner() {
-    local msg="$1"
-    local frames=('|' '/' '-' '\')
-    local i=0
-    while true; do
-        printf "\r  ${TOMORO_CYAN}%s${TOMORO_NC} %s" "${frames[$i]}" "$msg"
-        i=$(( (i + 1) % 4 ))
-        sleep 0.1
-    done
+    tomoro_anim_spinner_start "$1" &
+    echo $!
 }
 
 tomoro_ui_run_with_spinner() {
     local msg="$1"
     shift
-    tomoro_ui_spinner "$msg" &
-    local spin_pid=$!
-    "$@"
-    local exit_code=$?
-    kill "$spin_pid" 2>/dev/null || true
-    wait "$spin_pid" 2>/dev/null || true
-    printf "\r\033[K"
-    return "$exit_code"
+    if declare -f tomoro_anim_run >/dev/null 2>&1; then
+        tomoro_anim_run "$msg" "$@"
+    else
+        "$@"
+    fi
 }
 
 tomoro_usage() {
     tomoro_ui_logo
     echo -e "${TOMORO_BOLD}Perintah utama${TOMORO_NC}"
     echo
-    printf "  %-16s %s\n" "ingfo" "Menu ON / OFF + info mekanisme"
-    printf "  %-16s %s\n" "ingfo on" "Nyalakan bypass (sama: start)"
-    printf "  %-16s %s\n" "ingfo off" "Matikan bypass (sama: stop)"
+    printf "  %-16s %s\n" "ingfo" "Menu ON / OFF"
+    printf "  %-16s %s\n" "ingfo on" "Nyalakan bypass"
+    printf "  %-16s %s\n" "ingfo off" "Matikan bypass"
     echo
     echo -e "${TOMORO_BOLD}Lainnya${TOMORO_NC}"
     printf "  %-16s %s\n" "ingfo status" "Cek ON/OFF"
     printf "  %-16s %s\n" "ingfo test-crypto" "Uji GMGN & crypto"
     printf "  %-16s %s\n" "ingfo doctor" "Diagnosa sistem"
-    echo
-    echo -e "${TOMORO_DIM}tomoro = alias ingfo · ultra: ingfo on --ultra${TOMORO_NC}"
     echo
 }
 
